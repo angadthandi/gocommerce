@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/angadthandi/gocommerce/gosocket"
+
 	"github.com/angadthandi/gocommerce/api/rest"
 	"github.com/gorilla/mux"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -13,6 +15,7 @@ import (
 
 func Handle(
 	dbRef *mongo.Database,
+	hub *gosocket.Hub,
 ) {
 	r := mux.NewRouter().StrictSlash(true)
 
@@ -21,17 +24,17 @@ func Handle(
 
 		b := postDataHandler(r)
 
-		rest.API(w, r, dbRef, b)
+		rest.API(w, r, hub, dbRef, b)
 	})
 
-	// r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-	// 	goappsocket.ServeWs(
-	// 		hub,
-	// 		w,
-	// 		r,
-	// 		dbRef,
-	// 	)
-	// })
+	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		gosocket.ServeWs(
+			hub,
+			w,
+			r,
+			dbRef,
+		)
+	})
 
 	// // static files
 	// r.HandleFunc("/vendor/", func(w http.ResponseWriter, r *http.Request) {

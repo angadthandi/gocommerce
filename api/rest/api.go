@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/angadthandi/gocommerce/auth"
+	"github.com/angadthandi/gocommerce/gosocket"
 	"github.com/mongodb/mongo-go-driver/mongo"
 
 	log "github.com/angadthandi/gocommerce/log"
@@ -25,6 +26,7 @@ type GenericAPIResponse struct {
 func API(
 	w http.ResponseWriter,
 	r *http.Request,
+	hub *gosocket.Hub,
 	dbRef *mongo.Database,
 	jsonMsg json.RawMessage,
 ) {
