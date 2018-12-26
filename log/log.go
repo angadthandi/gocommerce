@@ -21,6 +21,13 @@ func SetLogFormatter(formatter logrus.Formatter) {
 	logger.Formatter = formatter
 }
 
+// Print logs a message at level Print on the standard logger.
+func Print(args ...interface{}) {
+	entry := logger.WithFields(logrus.Fields{})
+	entry.Data["file"] = fileInfo(2)
+	entry.Print(args...)
+}
+
 // Printf logs a message at level Printf on the standard logger.
 func Printf(format string, args ...interface{}) {
 	entry := logger.WithFields(logrus.Fields{})

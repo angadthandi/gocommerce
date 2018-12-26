@@ -4,32 +4,14 @@ import (
 	"net/http"
 
 	"github.com/angadthandi/gocommerce/config"
+	"github.com/angadthandi/gocommerce/dbconnect"
 	log "github.com/angadthandi/gocommerce/log"
 	"github.com/angadthandi/gocommerce/route"
-
 	// // https://godoc.org/github.com/mongodb/mongo-go-driver/mongo
-	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
 func main() {
-	log.Infof("Started main: %v", "goapp")
-
-	// dbUrl := "mongodb://" +
-	// 	config.MongoDBUsername + ":" +
-	// 	config.MongoDBPassword + "@" +
-	// 	config.MongoDBServiceName +
-	// 	config.MongoDBPort
-	// dbClient, err := mongo.Connect(context.Background(), dbUrl, nil)
-	// if err != nil {
-	// 	log.Fatalf("mongodb connection error : %v", err)
-	// }
-
-	// log.Debug("Connected to mongodb golangapp database")
-	// defer dbClient.Disconnect(context.Background())
-
-	// dbRef := dbClient.Database("GolangappDB")
-	// log.Debug("Initialized mongodb golangapp database")
-	var dbRef *mongo.Database
+	dbRef := dbconnect.Conn()
 
 	route.Handle(dbRef)
 
