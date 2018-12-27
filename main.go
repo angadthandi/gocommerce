@@ -7,6 +7,7 @@ import (
 	"github.com/angadthandi/gocommerce/dbconnect"
 	"github.com/angadthandi/gocommerce/gosocket"
 	log "github.com/angadthandi/gocommerce/log"
+	"github.com/angadthandi/gocommerce/registry"
 	"github.com/angadthandi/gocommerce/route"
 	// // https://godoc.org/github.com/mongodb/mongo-go-driver/mongo
 )
@@ -14,12 +15,14 @@ import (
 func main() {
 	dbRef := dbconnect.Conn()
 
+	registry := registry.NewRegistry()
+
 	// start hub
 	// for creating websocket conns
 	hub := gosocket.NewHub()
-	go hub.Run()
+	go hub.Run(registry)
 
-	route.Handle(dbRef, hub)
+	route.Handle(dbRef, hub, registry)
 
 	log.Printf("Listening on Port: %v", config.ServerPort)
 	// start http web server

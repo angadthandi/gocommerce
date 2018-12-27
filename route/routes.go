@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/angadthandi/gocommerce/gosocket"
+	"github.com/angadthandi/gocommerce/registry"
 
 	"github.com/angadthandi/gocommerce/api/rest"
 	"github.com/gorilla/mux"
@@ -16,6 +17,7 @@ import (
 func Handle(
 	dbRef *mongo.Database,
 	hub *gosocket.Hub,
+	reg *registry.Registry,
 ) {
 	r := mux.NewRouter().StrictSlash(true)
 
@@ -24,7 +26,7 @@ func Handle(
 
 		b := postDataHandler(r)
 
-		rest.API(w, r, hub, dbRef, b)
+		rest.API(w, r, dbRef, reg, b)
 	})
 
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +35,7 @@ func Handle(
 			w,
 			r,
 			dbRef,
+			reg,
 		)
 	})
 

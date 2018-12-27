@@ -1,9 +1,8 @@
 package gosocket
 
 import (
-	"encoding/json"
-
 	log "github.com/angadthandi/gocommerce/log"
+	"github.com/angadthandi/gocommerce/registry"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -31,7 +30,9 @@ func NewHub() *Hub {
 	}
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(
+	reg *registry.Registry,
+) {
 	log.Debug("Hub Run!")
 	for {
 		select {
@@ -42,6 +43,8 @@ func (h *Hub) Run() {
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
+
+				reg.UnRegisterClient(client.clientID)
 				log.Debugf("Hub unregister client: %v", client)
 			}
 		case message := <-h.broadcast:
@@ -56,13 +59,4 @@ func (h *Hub) Run() {
 			}
 		}
 	}
-}
-
-// SendMsgToAllClients sends message to
-// all connected clients
-func (h *Hub) SendMsgToAllClients(
-	jsonMsg json.RawMessage,
-) {
-	log.Debugf("hub SendMsgToAllClients jsonMsg: %v", jsonMsg)
-	h.broadcast <- jsonMsg
 }

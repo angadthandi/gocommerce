@@ -2,11 +2,12 @@ package gosocket
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"time"
 
+	"github.com/angadthandi/gocommerce/api/ws"
 	log "github.com/angadthandi/gocommerce/log"
+	"github.com/angadthandi/gocommerce/registry"
 	"github.com/gorilla/websocket"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
@@ -44,13 +45,8 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
-}
 
-// SendMessageOnHub sends received message from client
-// on broadcast channel of Hub
-func (c *Client) SendMessageOnHub(jsonMsg json.RawMessage) {
-	log.Debugf("client SendMessageOnHub jsonMsg: %v", jsonMsg)
-	c.Hub.broadcast <- jsonMsg
+	clientID registry.ClientID
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -59,7 +55,10 @@ func (c *Client) SendMessageOnHub(jsonMsg json.RawMessage) {
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
 func (c *Client) ReadPump(
+	w http.ResponseWriter,
+	r *http.Request,
 	dbRef *mongo.Database,
+	reg *registry.Registry,
 ) {
 	log.Debugf("client readPump: %v", c)
 	defer func() {
@@ -79,17 +78,11 @@ func (c *Client) ReadPump(
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		// // c.Hub.broadcast <- message
-		// // registry will handle forwarding request
-		// // to ws api
-		// registry.ClientRegistry(
-		// 	c,
-		// 	dbClient,
-		// 	MessagingClient,
-		// 	MessagesRegistryClient,
-		// 	message,
-		// 	c.Hub.ChClientCorrelationIds,
-		// )
+		// c.Hub.broadcast <- message
+		// ws/api will handle forwarding request
+		go ws.API(
+			w, r, dbRef, reg, c.clientID, message,
+		)
 	}
 }
 
@@ -146,23 +139,37 @@ func ServeWs(
 	w http.ResponseWriter,
 	r *http.Request,
 	dbRef *mongo.Database,
+	reg *registry.Registry,
 ) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Errorf("ServeWs Upgrade error: %v", err)
 		return
 	}
+
+	var cid registry.ClientID
+
 	client := &Client{
 		Hub:  hub,
 		conn: conn,
 		send: make(chan []byte, 256),
+
+		clientID: cid,
 	}
 	client.Hub.register <- client
+
+	reg.RegisterClient(
+		client.clientID,
+		client.send,
+	)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.WritePump()
 	go client.ReadPump(
+		w,
+		r,
 		dbRef,
+		reg,
 	)
 }
