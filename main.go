@@ -15,14 +15,14 @@ import (
 func main() {
 	dbRef := dbconnect.Conn()
 
-	registry := registry.NewRegistry()
+	clientRegistry := registry.NewRegistry()
 
 	// start hub
 	// for creating websocket conns
 	hub := gosocket.NewHub()
-	go hub.Run(registry)
+	go hub.Run(clientRegistry)
 
-	route.Handle(dbRef, hub, registry)
+	route.Handle(dbRef, hub, clientRegistry)
 
 	log.Printf("Listening on Port: %v", config.ServerPort)
 	// start http web server

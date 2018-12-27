@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/angadthandi/gocommerce/api/ws"
+	"github.com/angadthandi/gocommerce/genuuid"
 	log "github.com/angadthandi/gocommerce/log"
 	"github.com/angadthandi/gocommerce/registry"
 	"github.com/gorilla/websocket"
@@ -55,8 +56,6 @@ type Client struct {
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
 func (c *Client) ReadPump(
-	w http.ResponseWriter,
-	r *http.Request,
 	dbRef *mongo.Database,
 	reg *registry.Registry,
 ) {
@@ -81,7 +80,7 @@ func (c *Client) ReadPump(
 		// c.Hub.broadcast <- message
 		// ws/api will handle forwarding request
 		go ws.API(
-			w, r, dbRef, reg, c.clientID, message,
+			dbRef, reg, c.clientID, message,
 		)
 	}
 }
@@ -148,6 +147,7 @@ func ServeWs(
 	}
 
 	var cid registry.ClientID
+	cid.UniqueID = genuuid.GenUUID()
 
 	client := &Client{
 		Hub:  hub,
@@ -166,10 +166,5 @@ func ServeWs(
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.WritePump()
-	go client.ReadPump(
-		w,
-		r,
-		dbRef,
-		reg,
-	)
+	go client.ReadPump(dbRef, reg)
 }

@@ -35,7 +35,7 @@ func API(
 		recieve GenericAPIRecieve
 	)
 
-	err := json.Unmarshal(jsonMsg, recieve)
+	err := json.Unmarshal(jsonMsg, &recieve)
 	if err != nil {
 		log.Errorf("rest/API JSON unmarshal error: %v", err)
 		return

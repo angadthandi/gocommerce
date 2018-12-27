@@ -2,10 +2,7 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
 
-	"github.com/angadthandi/gocommerce/auth"
 	"github.com/angadthandi/gocommerce/log"
 	"github.com/angadthandi/gocommerce/registry"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -23,27 +20,27 @@ type GenericWSResponse struct {
 
 // handler for ws/API
 func API(
-	w http.ResponseWriter,
-	r *http.Request,
 	dbRef *mongo.Database,
 	reg *registry.Registry,
 	caller registry.ClientID,
 	jsonMsg json.RawMessage,
 ) {
 	var (
-		resp    GenericWSResponse
-		recieve GenericWSRecieve
+		resp                GenericWSResponse
+		recieve             GenericWSRecieve
+		sendMsgToAllClients bool
 	)
 
-	err := json.Unmarshal(jsonMsg, recieve)
+	err := json.Unmarshal(jsonMsg, &recieve)
 	if err != nil {
-		log.Errorf("rest/API JSON unmarshal error: %v", err)
+		log.Errorf("ws/API JSON unmarshal error: %v", err)
 		return
 	}
 
 	switch recieve.Api {
-	case "auth":
-		resp.Message = auth.Authenticate(recieve.Message)
+	case "test":
+		resp.Message = recieve.Message
+		sendMsgToAllClients = true
 
 	default:
 		resp.Message = "Default JSON Message!"
@@ -53,10 +50,14 @@ func API(
 	resp.Api = recieve.Api
 	b, err := json.Marshal(resp)
 	if err != nil {
-		log.Errorf("rest/API JSON Marshal error: %v", err)
+		log.Errorf("ws/API JSON Marshal error: %v", err)
 		return
 	}
 
-	log.Debugf("rest/API JSON Response: %v", string(b))
-	fmt.Fprintf(w, "rest/API JSON Response: %v", string(b))
+	log.Debugf("ws/API JSON Response: %v", string(b))
+	if sendMsgToAllClients {
+		reg.SendToAllClients(b)
+	} else {
+		reg.SendToCaller(caller, b)
+	}
 }
