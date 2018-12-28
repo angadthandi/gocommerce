@@ -41,12 +41,18 @@ func API(
 		return
 	}
 
+	var respErr error
 	switch recieve.Api {
 	case "auth":
-		resp.Message = auth.Authenticate(recieve.Message)
+		resp.Message, respErr = auth.Authenticate(recieve.Message)
 
 	default:
 		resp.Message = "Default JSON Message!"
+	}
+
+	if respErr != nil {
+		log.Errorf("rest/API response error: %v", respErr)
+		return
 	}
 
 	// Response
