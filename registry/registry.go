@@ -8,6 +8,7 @@ import (
 type ClientID struct {
 	TokenID  string
 	UniqueID string
+	UserID   int
 }
 
 type Registry struct {

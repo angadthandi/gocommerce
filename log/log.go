@@ -13,6 +13,10 @@ var logger = logrus.New()
 // Fields wraps logrus.Fields, which is a map[string]interface{}
 type Fields logrus.Fields
 
+func init() {
+	SetLogLevel(logrus.DebugLevel)
+}
+
 func SetLogLevel(level logrus.Level) {
 	logger.Level = level
 }

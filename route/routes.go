@@ -29,13 +29,22 @@ func Handle(
 		rest.API(w, r, dbRef, reg, b)
 	})
 
-	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/ws/{token}", func(w http.ResponseWriter, r *http.Request) {
+
+		varsMap := mux.Vars(r)
+		token, ok := varsMap["token"]
+		if !ok {
+			log.Error("Invalid token!")
+			return
+		}
+
 		gosocket.ServeWs(
 			hub,
 			w,
 			r,
 			dbRef,
 			reg,
+			token,
 		)
 	})
 

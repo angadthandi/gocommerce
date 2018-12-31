@@ -34,7 +34,11 @@ window.onload = function () {
         return false;
     };
     if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        // conn = new WebSocket("ws://" + document.location.host + "/ws");
+        // TODO read token from cookie.
+        // Create SignIn & save token to cookie,
+        // after successful signin
+        conn = new WebSocket("ws://" + document.location.host + "/ws/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE0NDQ0Nzg0MDAsInVzZXJpZCI6MTB9.y3yWjqvopwq32NjT84LSYTPA8v3WH9poYokqtglop7I");
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";

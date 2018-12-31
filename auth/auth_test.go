@@ -38,17 +38,3 @@ func TestAuthenticate(t *testing.T) {
 
 	fmt.Printf("Authenticate response: %v", response)
 }
-
-func TestCreateToken(t *testing.T) {
-	userID := 10
-
-	utoken := CreateToken(userID)
-
-	fmt.Printf("CreateToken response: %v", utoken)
-}
-
-func BenchmarkCreateToken(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		CreateToken(n)
-	}
-}

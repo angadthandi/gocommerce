@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/angadthandi/gocommerce/api/ws"
+	"github.com/angadthandi/gocommerce/auth"
 	"github.com/angadthandi/gocommerce/genuuid"
 	log "github.com/angadthandi/gocommerce/log"
 	"github.com/angadthandi/gocommerce/registry"
@@ -139,6 +140,7 @@ func ServeWs(
 	r *http.Request,
 	dbRef *mongo.Database,
 	reg *registry.Registry,
+	tokenStr string,
 ) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -146,8 +148,16 @@ func ServeWs(
 		return
 	}
 
+	userID, err := auth.ParseToken(tokenStr)
+	if err != nil {
+		log.Errorf("unable to parse token: %v", err)
+		return
+	}
+
 	var cid registry.ClientID
 	cid.UniqueID = genuuid.GenUUID()
+	cid.TokenID = tokenStr
+	cid.UserID = userID
 
 	client := &Client{
 		Hub:  hub,
