@@ -138,6 +138,15 @@ func ErrorWithFields(l interface{}, f Fields) {
 	}
 }
 
+// Fatalf logs a message at level Fatalf on the standard logger.
+func Fatalf(format string, args ...interface{}) {
+	if logger.Level >= logrus.FatalLevel {
+		entry := logger.WithFields(logrus.Fields{})
+		entry.Data["file"] = fileInfo(2)
+		entry.Fatalf(format, args...)
+	}
+}
+
 // Fatal logs a message at level Fatal on the standard logger.
 func Fatal(args ...interface{}) {
 	if logger.Level >= logrus.FatalLevel {

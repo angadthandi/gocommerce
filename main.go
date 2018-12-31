@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/angadthandi/gocommerce/config"
@@ -13,7 +14,10 @@ import (
 )
 
 func main() {
-	dbRef := dbconnect.Conn()
+	dbClient := dbconnect.Conn()
+	defer dbClient.Disconnect(context.Background())
+	dbRef := dbClient.Database("gocommercedb")
+	log.Debug("Initialized mongodb gocommerce database")
 
 	clientRegistry := registry.NewRegistry()
 
