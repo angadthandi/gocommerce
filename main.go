@@ -14,8 +14,11 @@ import (
 )
 
 func main() {
+	// get mongo client reference
 	dbClient := dbconnect.Conn()
 	defer dbClient.Disconnect(context.Background())
+
+	// get mongo database reference
 	dbRef := dbClient.Database("gocommercedb")
 	log.Debug("Initialized mongodb gocommerce database")
 

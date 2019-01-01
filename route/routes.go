@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/angadthandi/gocommerce/dbconnect/test"
 	"github.com/angadthandi/gocommerce/gosocket"
 	"github.com/angadthandi/gocommerce/registry"
 
@@ -47,6 +48,12 @@ func Handle(
 			token,
 		)
 	})
+
+	// Test Routes --------------------------------
+	r.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		test.TestHandler(w, r, dbRef)
+	})
+	// Test Routes --------------------------------
 
 	// // static files
 	// r.HandleFunc("/vendor/", func(w http.ResponseWriter, r *http.Request) {
